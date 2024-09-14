@@ -30,7 +30,7 @@ def fetch_tasks(headers):
     response = requests.get(url, headers=headers)
     
     # Print full response content for debugging
-    print(Fore.YELLOW + "API Response:", response.json())  # Print entire response JSON
+    #print(Fore.YELLOW + "API Response:", response.json())  # Print entire response JSON
     if response.status_code == 200:
         projects = response.json()
         if isinstance(projects, list):
