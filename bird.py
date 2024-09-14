@@ -26,7 +26,7 @@ def get_headers(token):
     }
 
 def fetch_tasks(headers):
-    url = "https://birdx-api.birds.dog/user-join-task"
+    url = "https://birdx-api.birds.dog/project"
     response = requests.get(url, headers=headers)
     
     if response.status_code == 200:
