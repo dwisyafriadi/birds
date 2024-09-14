@@ -65,7 +65,7 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        tasks = fetch_tasks(headers).get('user-join-task', [])
+        tasks = fetch_tasks(headers).get('user', [])
         
         for task in tasks:
             if not task['completed']:
@@ -95,10 +95,10 @@ def user():
 
         if response.status_code == 200:
             data = response.json()
-            first_name = data.get('firstName')
-            last_name = data.get('lastName')
+            first_name = data.get('telegramUserName')
+            last_name = data.get('telegramId')
             telegram_age = data.get('telegramAge')
-            total_rewards = data.get('totalRewards')
+            total_rewards = data.get('telegramAgePoint')
             
             all_user_data.append([first_name, last_name, telegram_age, total_rewards])
             total_rewards_sum += total_rewards
