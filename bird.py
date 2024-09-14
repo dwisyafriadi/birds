@@ -30,9 +30,15 @@ def fetch_tasks(headers):
     response = requests.get(url, headers=headers)
     
     if response.status_code == 200:
-        return response.json()
+        data = response.json()
+        if isinstance(data, dict) and 'tasks' in data:
+            return data['tasks']  # Return the tasks list directly
+        else:
+            print(Fore.RED + "Unexpected format: 'tasks' key not found in the response.")
+            return []  # Return an empty list if the format is incorrect
     else:
         response.raise_for_status()
+
 
 def clear_task(task_id, headers):
     url = f"https://birdx-api.birds.dog/user-join-task/{task_id}"
@@ -68,15 +74,13 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        project_data = fetch_tasks(headers)
+        tasks = fetch_tasks(headers)  # Fetch the tasks directly
         
-        # Ensure that we have tasks to process
-        if project_data and "tasks" in project_data:
-            tasks = project_data["tasks"]
+        if isinstance(tasks, list):  # Ensure tasks is a list
             for task in tasks:
                 if task.get('is_enable'):
                     try:
-                        clear_task(task['_id'], headers)  # Use '_id' instead of 'taskId'
+                        clear_task(task['_id'], headers)  # Use '_id' as task identifier
                     except requests.RequestException:
                         # Handle any request exception and move on to the next task
                         print(Fore.WHITE + f"Skipping task {task['_id']} due to an error.")
