@@ -72,10 +72,10 @@ def complete_all_tasks():
             for task in tasks:
                 if not task.get('completed'):
                     try:
-                        clear_task(task['id'], headers)
+                        clear_task(task['taskId'], headers)
                     except requests.RequestException:
                         # Handle any request exception and move on to the next task
-                        print(Fore.WHITE + f"Skipping task {task['id']} due to an error.")
+                        print(Fore.WHITE + f"Skipping task {task['taskId']} due to an error.")
         else:
             print(Fore.RED + "Invalid task format received.")
 
