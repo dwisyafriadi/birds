@@ -48,7 +48,7 @@ def fetch_tasks(headers):
 
 def clear_task(task_id, headers):
     # Update the URL to the correct endpoint if needed
-    url = f"https://birdx-api.birds.dog/updated-endpoint/{task_id}"
+    url = f"https://birdx-api.birds.dog/project/join-task/{task_id}"
     response = requests.post(url, headers=headers, json={})
     
     if response.status_code == 200:
