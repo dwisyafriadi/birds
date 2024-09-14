@@ -132,7 +132,8 @@ def user():
 
 def main():
     print_welcome_message()
-    complete_all_tasks()
+    # complete_all_tasks()
+    fetch_tasks()
     print(Fore.WHITE + f"\nDisplaying user information...")
     user()
 
