@@ -55,9 +55,6 @@ def clear_task(task_id, headers):
             print(Fore.RED + f"Response content: {response.text}")
         response.raise_for_status()
 
-
-        
-        
 def print_welcome_message():
     print(Fore.GREEN + Style.BRIGHT + "CATS BOT")
     print(Fore.RED + Style.BRIGHT + "NOT FOR SALE ! Ngotak dikit bang. Ngoding susah2 kau tinggal rename :)\n\n")        
@@ -122,16 +119,23 @@ def user():
     print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
     print(Fore.GREEN + f"\nTotal Rewards: " + Fore.WHITE + f"{total_rewards_sum}" + Style.RESET_ALL)
 
-
 def main():
     print_welcome_message()
     print(Fore.WHITE + f"\nDisplaying user information...")
     user()
-    print(Fore.WHITE + f"\nDisplaying Task information...")
-    fetch_tasks()
+    
+    tokens = get_authorization_tokens()
+    for token in tokens:
+        headers = get_headers(token)
+        print(Fore.WHITE + f"\nDisplaying Task information for token {token[:10]}...")
+        tasks = fetch_tasks(headers)
+        if tasks:
+            print(Fore.WHITE + "Task data received.")
+        else:
+            print(Fore.RED + "No tasks available.")
+
     print(Fore.WHITE + f"\nRun auto complete task information...")
     complete_all_tasks()
-
 
 # Example usage
 if __name__ == "__main__":
