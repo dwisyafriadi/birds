@@ -65,7 +65,7 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        tasks = fetch_tasks(headers).get('user', [])
+        tasks = fetch_tasks(headers).get('user-join-task', [])
         
         for task in tasks:
             if not task['completed']:
