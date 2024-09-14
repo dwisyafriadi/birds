@@ -77,6 +77,10 @@ def complete_all_tasks():
 
 def user():
     tokens = get_authorization_tokens()
+    if not tokens:
+        print(Fore.RED + "No tokens found!")
+        return
+    
     all_user_data = []
     total_rewards_sum = 0
     
@@ -85,32 +89,29 @@ def user():
         url = "https://birdx-api.birds.dog/user"
         response = requests.get(url, headers=headers)
         
+        # Print token and response status for debugging
+        print(f"Token: {token[:10]}...")  # Print first 10 characters of the token
+        print(f"Response Status: {response.status_code}")
+
         if response.status_code == 200:
             data = response.json()
-            # Extract required fields
             first_name = data.get('firstName')
             last_name = data.get('lastName')
             telegram_age = data.get('telegramAge')
             total_rewards = data.get('totalRewards')
             
-            # Collect user data
             all_user_data.append([first_name, last_name, telegram_age, total_rewards])
-            total_rewards_sum += total_rewards  # Accumulate total rewards
+            total_rewards_sum += total_rewards
         else:
             print(Fore.RED + f"Failed to fetch user data for token {token}.")
             response.raise_for_status()
     
-    # Prepare data for tabulate
-    table_data = [
-        ["First Name", "Last Name", "Telegram Age", "Total Rewards"]
-    ]
+    # Display data
+    table_data = [["First Name", "Last Name", "Telegram Age", "Total Rewards"]]
     table_data.extend(all_user_data)
-    
-    # Print table
     print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
-    
-    # Print total rewards sum with color
     print(Fore.GREEN + f"\nTotal Rewards: " + Fore.WHITE + f"{total_rewards_sum}" + Style.RESET_ALL)
+
 
 def main():
     print_welcome_message()
