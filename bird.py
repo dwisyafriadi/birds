@@ -35,24 +35,36 @@ def fetch_tasks(headers):
         response.raise_for_status()
 
 def clear_task(task_id, headers):
-    url = f"https://birdx-api.birds.dog/user-join-task/{task_id}/complete"
-    response = requests.post(url, headers=headers, json={})
+    url = "https://birdx-api.birds.dog/project/join-task"
+    
+    # Define the payload according to the provided format
+    payload = {
+        "taskId": task_id,
+        "channelId": "",
+        "slug": "none",
+        "point": 200
+    }
+
+    # Make the POST request to complete the task
+    response = requests.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
-        print(Fore.GREEN + f"Task {task_id} successfully marked as completed.")
-        return response.json()
+        response_data = response.json()
+        if response_data.get('msg') == "Successfully":
+            print(Fore.GREEN + f"Task {task_id} successfully marked as completed.")
+        else:
+            print(Fore.YELLOW + f"Task {task_id} might already be completed or there is another message: {response_data}")
     else:
-        # Display detailed error message from the response
+        # Display error if task completion fails
         print(Fore.RED + f"Failed to mark task {task_id} as completed.")
         print(Fore.RED + f"Status Code: {response.status_code}")
         try:
-            # Attempt to parse JSON response for error details
             error_data = response.json()
             print(Fore.RED + f"Error details: {error_data}")
         except ValueError:
-            # If response content is not JSON, print the raw content
             print(Fore.RED + f"Response content: {response.text}")
         response.raise_for_status()
+
         
 def print_welcome_message():
     print(Fore.WHITE + r"""
