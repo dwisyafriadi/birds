@@ -107,7 +107,7 @@ def user():
             response.raise_for_status()
     
     # Display data
-    table_data = [["First Name", "Last Name", "Telegram Age", "Total Rewards"]]
+    table_data = [["First Name", "Id Telegram", "Umur Telegram", "Total Rewards"]]
     table_data.extend(all_user_data)
     print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
     print(Fore.GREEN + f"\nTotal Rewards: " + Fore.WHITE + f"{total_rewards_sum}" + Style.RESET_ALL)
