@@ -59,14 +59,7 @@ def clear_task(task_id, headers):
         
         
 def print_welcome_message():
-    print(Fore.WHITE + r"""
-          
-█▀▀ █░█ ▄▀█ █░░ █ █▄▄ █ █▀▀
-█▄█ █▀█ █▀█ █▄▄ █ █▄█ █ ██▄
-          """)
     print(Fore.GREEN + Style.BRIGHT + "CATS BOT")
-    print(Fore.YELLOW + Style.BRIGHT + "Free Konsultasi Join Telegram Channel: https://t.me/ghalibie")
-    print(Fore.BLUE + Style.BRIGHT + "Buy me a coffee :) 0823 2367 3487 GOPAY / DANA")
     print(Fore.RED + Style.BRIGHT + "NOT FOR SALE ! Ngotak dikit bang. Ngoding susah2 kau tinggal rename :)\n\n")        
 
 def complete_all_tasks():
@@ -132,12 +125,13 @@ def user():
 
 def main():
     print_welcome_message()
+    print(Fore.WHITE + f"\nDisplaying user information...")
+    user()
     print(Fore.WHITE + f"\nDisplaying Task information...")
     fetch_tasks()
     print(Fore.WHITE + f"\nRun auto complete task information...")
     complete_all_tasks()
-    print(Fore.WHITE + f"\nDisplaying user information...")
-    user()
+
 
 # Example usage
 if __name__ == "__main__":
