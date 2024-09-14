@@ -68,19 +68,20 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        tasks = fetch_tasks(headers)
+        project_data = fetch_tasks(headers)
         
-        # Check if tasks is a list before proceeding
-        if isinstance(tasks, list):
+        # Ensure that we have tasks to process
+        if project_data and "tasks" in project_data:
+            tasks = project_data["tasks"]
             for task in tasks:
-                if not task.get('completed'):
+                if task.get('is_enable'):
                     try:
-                        clear_task(task['taskId'], headers)
+                        clear_task(task['_id'], headers)  # Use '_id' instead of 'taskId'
                     except requests.RequestException:
                         # Handle any request exception and move on to the next task
-                        print(Fore.WHITE + f"Skipping task {task['taskId']} due to an error.")
+                        print(Fore.WHITE + f"Skipping task {task['_id']} due to an error.")
         else:
-            print(Fore.RED + "Invalid task format received.")
+            print(Fore.RED + "No valid tasks found or tasks data format is incorrect.")
 
 def user():
     tokens = get_authorization_tokens()
