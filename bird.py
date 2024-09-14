@@ -12,7 +12,7 @@ def get_headers(token):
     return {
         "accept": "*/*",
         "accept-language": "en-US,en;q=0.9",
-        "authorization": f"tma {token}",
+        "telegramauth": f"tma {token}",
         "content-type": "application/json",
         "priority": "u=1, i",
         "sec-ch-ua": "\"Not)A;Brand\";v=\"99\", \"Microsoft Edge\";v=\"127\", \"Chromium\";v=\"127\", \"Microsoft Edge WebView2\";v=\"127\"",
