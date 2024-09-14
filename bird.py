@@ -47,9 +47,13 @@ def fetch_tasks(headers):
         response.raise_for_status()
 
 def clear_task(task_id, headers):
-    # Update the URL to the correct endpoint if needed
-    url = f"https://birdx-api.birds.dog/project/join-task"
-    response = requests.post(url, headers=headers, json={})
+    # Update the URL to the correct endpoint
+    url = "https://birdx-api.birds.dog/project/join-task"
+    # Adjust the request payload as per API documentation
+    payload = {
+        "taskId": task_id  # or whatever parameter is required
+    }
+    response = requests.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
         response_data = response.json()
@@ -67,6 +71,7 @@ def clear_task(task_id, headers):
         except ValueError:
             print(Fore.RED + f"Response content: {response.text}")
         response.raise_for_status()
+
 
 
 def print_welcome_message():
