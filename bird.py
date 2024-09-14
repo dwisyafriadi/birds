@@ -29,6 +29,8 @@ def fetch_tasks(headers):
     url = "https://birdx-api.birds.dog/project"
     response = requests.get(url, headers=headers)
     
+    # Print full response content for debugging
+    print(Fore.YELLOW + "API Response:", response.json())  # Print entire response JSON
     if response.status_code == 200:
         data = response.json()
         if isinstance(data, dict) and 'tasks' in data:
@@ -38,7 +40,6 @@ def fetch_tasks(headers):
             return []  # Return an empty list if the format is incorrect
     else:
         response.raise_for_status()
-
 
 def clear_task(task_id, headers):
     url = f"https://birdx-api.birds.dog/user-join-task/{task_id}"
