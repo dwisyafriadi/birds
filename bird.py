@@ -35,7 +35,7 @@ def fetch_tasks(headers):
         response.raise_for_status()
 
 def clear_task(task_id, headers):
-    url = f"https://birdx-api.birds.dog/user-join-task/{task_id}/complete"
+    url = f"https://birdx-api.birds.dog/user-join-task/{task_id}"
     response = requests.post(url, headers=headers, json={})
     
     if response.status_code == 200:
