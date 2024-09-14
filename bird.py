@@ -46,13 +46,18 @@ def fetch_tasks(headers):
     else:
         response.raise_for_status()
 
-def clear_task(task_id, headers):
+def clear_task(task_id, channel_id, slug, point, headers):
     # Update the URL to the correct endpoint
     url = "https://birdx-api.birds.dog/project/join-task"
-    # Adjust the request payload as per API documentation
+    
+    # Prepare the payload according to the provided sample
     payload = {
-        "taskId": task_id  # or whatever parameter is required
+        "taskId": task_id,
+        "channelId": channel_id,
+        "slug": slug,
+        "point": point
     }
+    
     response = requests.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
@@ -74,6 +79,7 @@ def clear_task(task_id, headers):
 
 
 
+
 def print_welcome_message():
     print(Fore.GREEN + Style.BRIGHT + "CATS BOT")
     print(Fore.RED + Style.BRIGHT + "NOT FOR SALE ! Ngotak dikit bang. Ngoding susah2 kau tinggal rename :)\n\n")        
@@ -87,18 +93,25 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        tasks = fetch_tasks(headers)  # Fetch the tasks directly
+        tasks_data = fetch_tasks(headers)
         
-        if isinstance(tasks, list):  # Ensure tasks is a list
-            for task in tasks:
+        if isinstance(tasks_data, list):
+            for task in tasks_data:
                 if task.get('is_enable'):
                     try:
-                        clear_task(task['_id'], headers)  # Use '_id' as task identifier
+                        clear_task(
+                            task['_id'],                # taskId
+                            task.get('channelId', ''),  # channelId
+                            task.get('slug', 'none'),   # slug
+                            task.get('point', 0),       # point
+                            headers
+                        )
                     except requests.RequestException:
                         # Handle any request exception and move on to the next task
                         print(Fore.WHITE + f"Skipping task {task['_id']} due to an error.")
         else:
             print(Fore.RED + "No valid tasks found or tasks data format is incorrect.")
+
 
 def user():
     tokens = get_authorization_tokens()
