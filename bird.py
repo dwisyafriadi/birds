@@ -47,7 +47,8 @@ def fetch_tasks(headers):
         response.raise_for_status()
 
 def clear_task(task_id, headers):
-    url = f"https://birdx-api.birds.dog/user-join-task/{task_id}"
+    # Update the URL to the correct endpoint if needed
+    url = f"https://birdx-api.birds.dog/updated-endpoint/{task_id}"
     response = requests.post(url, headers=headers, json={})
     
     if response.status_code == 200:
@@ -66,6 +67,7 @@ def clear_task(task_id, headers):
         except ValueError:
             print(Fore.RED + f"Response content: {response.text}")
         response.raise_for_status()
+
 
 def print_welcome_message():
     print(Fore.GREEN + Style.BRIGHT + "CATS BOT")
