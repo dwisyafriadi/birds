@@ -42,7 +42,16 @@ def clear_task(task_id, headers):
         print(Fore.GREEN + f"Task {task_id} successfully marked as completed.")
         return response.json()
     else:
+        # Display detailed error message from the response
         print(Fore.RED + f"Failed to mark task {task_id} as completed.")
+        print(Fore.RED + f"Status Code: {response.status_code}")
+        try:
+            # Attempt to parse JSON response for error details
+            error_data = response.json()
+            print(Fore.RED + f"Error details: {error_data}")
+        except ValueError:
+            # If response content is not JSON, print the raw content
+            print(Fore.RED + f"Response content: {response.text}")
         response.raise_for_status()
         
 def print_welcome_message():
