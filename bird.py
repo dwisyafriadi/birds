@@ -65,15 +65,19 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        tasks = fetch_tasks(headers).get('user-join-task', [])
+        tasks = fetch_tasks(headers)
         
-        for task in tasks:
-            if not task['completed']:
-                try:
-                    clear_task(task['id'], headers)
-                except requests.RequestException:
-                    # Handle any request exception and move on to the next task
-                    print(Fore.WHITE + f"Skipping task {task['id']} due to an error.")
+        # Check if tasks is a list before proceeding
+        if isinstance(tasks, list):
+            for task in tasks:
+                if not task.get('completed'):
+                    try:
+                        clear_task(task['id'], headers)
+                    except requests.RequestException:
+                        # Handle any request exception and move on to the next task
+                        print(Fore.WHITE + f"Skipping task {task['id']} due to an error.")
+        else:
+            print(Fore.RED + "Invalid task format received.")
 
 def user():
     tokens = get_authorization_tokens()
