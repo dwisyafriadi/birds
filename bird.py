@@ -32,12 +32,17 @@ def fetch_tasks(headers):
     # Print full response content for debugging
     print(Fore.YELLOW + "API Response:", response.json())  # Print entire response JSON
     if response.status_code == 200:
-        data = response.json()
-        if isinstance(data, dict) and 'tasks' in data:
-            return data['tasks']  # Return the tasks list directly
+        projects = response.json()
+        if isinstance(projects, list):
+            all_tasks = []
+            for project in projects:
+                tasks = project.get('tasks', [])
+                if isinstance(tasks, list):
+                    all_tasks.extend(tasks)  # Add tasks from this project to the all_tasks list
+            return all_tasks  # Return the combined list of tasks
         else:
-            print(Fore.RED + "Unexpected format: 'tasks' key not found in the response.")
-            return []  # Return an empty list if the format is incorrect
+            print(Fore.RED + "Unexpected format: Response is not a list.")
+            return []
     else:
         response.raise_for_status()
 
