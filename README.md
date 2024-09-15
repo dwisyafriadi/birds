@@ -3,8 +3,8 @@
 A brief description of yourself or your project. 
 
 ## Connect with Me
-
-[Join my Telegram channel](t.me/dasarpemulung)
+[Join my Telegram channel]
+(t.me/dasarpemulung)
 
 ## Support Me
 
