@@ -254,75 +254,14 @@ def system_check(headers):
 
 def upgrade(headers):
     # Fetch the incubation info
-    info_url = "https://birdx-api2.birds.dog/minigame/incubate/info"
-    info_response = requests.get(info_url, headers=headers)
-    
-    if info_response.status_code == 200:
-        upgrade_info = info_response.json()
-        
-        current_level = upgrade_info.get('level')
-        current_birds = upgrade_info.get('birds')
-        status = upgrade_info.get('status')
-        next_level_info = upgrade_info.get('nextLevel', {})
-        
-        next_level = next_level_info.get('level', current_level + 1)
-        next_level_type = next_level_info.get('type', 'egg')
-        next_level_birds = next_level_info.get('birds', 200)
-        next_level_worms = next_level_info.get('worms', 80)
-        next_level_duration = next_level_info.get('duration', 1)
+    upgrade_url = "https://birdx-api2.birds.dog/minigame/incubate/upgrade"
+    upgrade_response = requests.get(upgrade_url, headers=headers)
 
-        # Print the current status and upgrade details
-        print(f"Current Level: {current_level}")
-        print(f"Current Birds: {current_birds}")
-        print(f"Next Level: {next_level}")
-        print(f"Upgrade Status: {status}")
-
-        # Check if the incubation has started
-        if status == 'start':
-            print("Starting the incubation process...")
-            start_incubation_url = "https://birdx-api2.birds.dog/minigame/incubate/upgrade"
-            start_response = requests.post(start_incubation_url, headers=headers)
-            
-            if start_response.status_code == 200:
-                print("Incubation started successfully.")
-            else:
-                print(f"Failed to start incubation. Status Code: {start_response.status_code}")
-                print(f"Response Content: {start_response.text}")
-                return
-
-        # Check if the upgrade is still processing
-        if status == 'processing':
-            print("Upgrade already processing, waiting for confirmation...")
-        else:
-            # Upgrade if status is not confirmed
-            upgrade_url = "https://birdx-api2.birds.dog/minigame/incubate/upgrade"
-            upgrade_payload = {
-                "level": current_level,
-                "upgradedAt": int(time.time() * 1000),  # Convert to milliseconds
-                "status": "processing",
-                "duration": next_level_duration,
-                "birds": current_birds,
-                "nextLevel": {
-                    "level": next_level,
-                    "type": next_level_type,
-                    "birds": next_level_birds,
-                    "worms": next_level_worms,
-                    "duration": next_level_duration
-                }
-            }
-            print(f"Upgrading to Level {next_level}...")
-            upgrade_response = requests.post(upgrade_url, headers=headers, json=upgrade_payload)
-
-            if upgrade_response.status_code == 200:
+    if upgrade_response.status_code == 200:
                 print("Upgrade initiated successfully.")
-            else:
+    else:
                 print(f"Failed to initiate upgrade. Status Code: {upgrade_response.status_code}")
                 print(f"Response Content: {upgrade_response.text}")
-    
-    else:
-        print(f"Failed to fetch upgrade info. Status Code: {info_response.status_code}")
-        print(f"Response Content: {info_response.text}")
-
 
 def main():
     print_welcome_message()
@@ -344,7 +283,7 @@ def main():
         print(Fore.WHITE + f"\nRun auto complete task information...")
         complete_all_tasks()
         print(Fore.WHITE + f"\nRun auto Playing Game...")
-        play_game(headers)
+        #play_game(headers)
 
 if __name__ == "__main__":
     main()
