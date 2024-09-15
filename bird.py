@@ -96,7 +96,6 @@ def check_task_completion(task_id, headers):
                 print(Fore.YELLOW + f"Task {task_id} already completed.")
                 return True
         # If task_id is not found
-        print(Fore.RED + f"Task {task_id} not found. Please perform the task manually.")
         return False
     else:
         print(Fore.RED + f"Failed to fetch task completion status.")
