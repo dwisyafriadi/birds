@@ -1,2 +1,1 @@
-
-user=%7B%22id%22%3A7314418217%2C%22first_name%22%3A%2217%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22polisianjg%22%2C%22language_code%22%3A%22en%22%2C%22allows_write_to_pm%22%3Atrue%7D&chat_instance=3802433158634208926&chat_type=channel&start_param=1580490871&auth_date=1726347693&hash=0764ee1abca1b53955cb135b75d8c1472d5cc14f44d48daf6e56497324a84f80
+query_id=AAHuhcsqAwAAAO6Fyyrtcbll&user=%7B%22id%22%3A7160432110%2C%22first_name%22%3A%22Haya%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22haya2123%22%2C%22language_code%22%3A%22en%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1726365457&hash=64d23447ec2da104487572267ba5fc6c721b00b9d77706f1cac05d45a6b76221

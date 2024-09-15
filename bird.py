@@ -167,6 +167,57 @@ def user():
     print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
     print(Fore.GREEN + f"\nTotal Rewards: " + Fore.WHITE + f"{total_rewards_sum}" + Style.RESET_ALL)
 
+def play_game(headers):
+    url = "https://birdx-api2.birds.dog/minigame/egg/join"
+    
+    response = requests.post(url, headers=headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Extracting response details
+        game_id = data.get('_id')
+        telegram_id = data.get('telegramId')
+        turns_left = data.get('turn')
+        last_play_at = data.get('lastPlayAt')
+        results = data.get('results', [])
+        total_points = data.get('total')
+
+        # Check if there are any results
+        if results:
+            last_result = results[-1]  # Get the latest result
+            played_at = last_result.get('playedAt')
+            points = last_result.get('point')
+            result_id = last_result.get('_id')
+
+            # Displaying game information
+            print(Fore.GREEN + f"Game ID: {game_id}")
+            print(Fore.GREEN + f"Telegram ID: {telegram_id}")
+            print(Fore.GREEN + f"Turns Left: {turns_left}")
+            print(Fore.GREEN + f"Last Played At: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(last_play_at / 1000))}")
+            print(Fore.GREEN + f"Last Play Time (Server): {played_at}")
+            print(Fore.GREEN + f"Points Gained: {points}")
+            print(Fore.GREEN + f"Result ID: {result_id}")
+            print(Fore.GREEN + f"Total Points: {total_points}")
+
+            # Handling turns
+            if turns_left > 1:
+                print(Fore.YELLOW + f"Playing the game. {turns_left} turns left.")
+                # Implement your logic to play the game if needed
+            elif turns_left < 1:
+                print(Fore.RED + "No more turns left. Waiting for 1 hour before retrying...")
+                time.sleep(3600)  # Sleep for 1 hour
+            else:
+                print(Fore.RED + "Unexpected situation.")
+        else:
+            print(Fore.YELLOW + "No game results found yet.")
+
+    else:
+        print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
+        print(Fore.RED + f"Response Content: {response.text}")
+
+
+
 def main():
     print_welcome_message()
     print(Fore.WHITE + f"\nDisplaying user information...")
@@ -184,6 +235,8 @@ def main():
 
     print(Fore.WHITE + f"\nRun auto complete task information...")
     complete_all_tasks()
+    print(Fore.WHITE + f"\nRun auto Playing Game...")
+    play_game(headers)
 
 # Example usage
 if __name__ == "__main__":

@@ -69,12 +69,7 @@ def clear_task(task_id, channel_id, slug, point, headers):
     else:
         # Display error if task completion fails
         print(Fore.RED + f"Failed to mark task {task_id} as completed.")
-        print(Fore.RED + f"Status Code: {response.status_code}")
-        try:
-            error_data = response.json()
-            print(Fore.RED + f"Error details: {error_data}")
-        except ValueError:
-            print(Fore.RED + f"Response content: {response.text}")
+        print(Fore.RED + f"Please Running task Manually")
         response.raise_for_status()
 
 
@@ -83,6 +78,25 @@ def clear_task(task_id, channel_id, slug, point, headers):
 def print_welcome_message():
     print(Fore.GREEN + Style.BRIGHT + "CATS BOT")
     print(Fore.RED + Style.BRIGHT + "NOT FOR SALE ! Ngotak dikit bang. Ngoding susah2 kau tinggal rename :)\n\n")        
+
+def check_task_completion(task_id, headers):
+    url = "https://birdx-api.birds.dog/user-join-task/"
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        # Check if task_id is present in the response data
+        for task in data:
+            if task.get('taskId') == task_id:
+                print(Fore.YELLOW + f"Task {task_id} already completed.")
+                return True
+        # If task_id is not found
+        return False
+    else:
+        print(Fore.RED + f"Failed to fetch task completion status.")
+        print(Fore.RED + f"Status Code: {response.status_code}")
+        response.raise_for_status()
+
 
 def complete_all_tasks():
     tokens = get_authorization_tokens()
@@ -93,24 +107,27 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        tasks_data = fetch_tasks(headers)
+        tasks = fetch_tasks(headers)  # Fetch the tasks directly
         
-        if isinstance(tasks_data, list):
-            for task in tasks_data:
+        if isinstance(tasks, list):  # Ensure tasks is a list
+            for task in tasks:
                 if task.get('is_enable'):
-                    try:
-                        clear_task(
+                    task_id = task['_id']
+                    if not check_task_completion(task_id, headers):  # Check if the task is already completed
+                        try:
+                            clear_task(
                             task['_id'],                # taskId
                             task.get('channelId', ''),  # channelId
                             task.get('slug', 'none'),   # slug
                             task.get('point', 0),       # point
                             headers
-                        )
-                    except requests.RequestException:
-                        # Handle any request exception and move on to the next task
-                        print(Fore.WHITE + f"Skipping task {task['_id']} due to an error.")
+                            )
+                        except requests.RequestException:
+                            # Handle any request exception and move on to the next task
+                            print(Fore.WHITE + f"Skipping task {task_id} due to an error.")
         else:
             print(Fore.RED + "No valid tasks found or tasks data format is incorrect.")
+
 
 
 def user():
