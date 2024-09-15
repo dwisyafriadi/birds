@@ -121,7 +121,13 @@ def complete_all_tasks():
                     task_id = task['_id']
                     if not check_task_completion(task_id, headers):  # Check if the task is already completed
                         try:
-                            clear_task(task_id, headers)  # Use '_id' as task identifier
+                            clear_task(
+                            task['_id'],                # taskId
+                            task.get('channelId', ''),  # channelId
+                            task.get('slug', 'none'),   # slug
+                            task.get('point', 0),       # point
+                            headers
+                            )
                         except requests.RequestException:
                             # Handle any request exception and move on to the next task
                             print(Fore.WHITE + f"Skipping task {task_id} due to an error.")
