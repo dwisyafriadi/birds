@@ -247,21 +247,31 @@ def main():
     print(Fore.WHITE + f"\nDisplaying user information...")
     user()
     print(Fore.WHITE + f"\n............................")
+    
     tokens = get_authorization_tokens()
+    
     for token in tokens:
         headers = get_headers(token)
+        
+        # Display Task information
         print(Fore.WHITE + f"\nDisplaying Task information for token {token[:10]}...")
         tasks = fetch_tasks(headers)
         if tasks:
             print(Fore.WHITE + "Task data received.")
         else:
             print(Fore.RED + "No tasks available.")
-    print(Fore.WHITE + f"\nAuto Upgrade information...")
-    upgrade()
-    print(Fore.WHITE + f"\nRun auto complete task information...")
-    complete_all_tasks()
-    print(Fore.WHITE + f"\nRun auto Playing Game...")
-    play_game(headers)
+        
+        # Auto Upgrade
+        print(Fore.WHITE + f"\nAuto Upgrade information for token {token[:10]}...")
+        upgrade(headers)  # Pass 'headers' to upgrade()
+
+        # Complete tasks
+        print(Fore.WHITE + f"\nRun auto complete task information for token {token[:10]}...")
+        complete_all_tasks()
+        
+        # Play the game
+        print(Fore.WHITE + f"\nRun auto Playing Game for token {token[:10]}...")
+        play_game(headers)  # Pass 'headers' to play_game()
 
 # Example usage
 if __name__ == "__main__":
