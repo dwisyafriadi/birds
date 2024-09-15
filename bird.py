@@ -199,14 +199,9 @@ def play_game(headers):
         print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
         print(Fore.RED + f"Response Content: {response.text}")
 
+
 def upgrade(headers):
     url = "https://birdx-api2.birds.dog/minigame/incubate/upgrade"
-    
-
-    confirmation = input(Fore.WHITE + f"Apakah Anda ingin auto upgrade? (y/n): ").strip().lower()
-    if confirmation != 'y':
-        return
-    
     
     # Send the POST request to upgrade the incubator
     response = requests.post(url, headers=headers)
