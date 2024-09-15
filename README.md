@@ -1,10 +1,10 @@
-# Bot Birds (or Project Name)
+# Birds Bot (or Birds Bot)
 
 A brief description of yourself or your project. 
 
 ## Connect with Me
-[Join my Telegram channel]
-(t.me/dasarpemulung)
+
+[Join my Telegram channel](https://t.me/dasarpemulung)
 
 ## Support Me
 
