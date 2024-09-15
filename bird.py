@@ -201,45 +201,46 @@ def play_game(headers):
 
 
 def upgrade(headers):
-    url = "https://birdx-api2.birds.dog/minigame/incubate/upgrade"
+    # Step 1: Get current upgrade information from /incubate/info
+    info_url = "https://birdx-api2.birds.dog/minigame/incubate/info"
+    info_response = requests.get(info_url, headers=headers)
     
-    # Send the POST request to upgrade the incubator
-    response = requests.post(url, headers=headers)
-    
-    if response.status_code == 200:
-        data = response.json()
+    if info_response.status_code == 200:
+        upgrade_info = info_response.json()
         
-        # Extract current upgrade information
-        current_level = data.get('level')
-        upgraded_at = data.get('upgradedAt')
-        status = data.get('status')
-        duration = data.get('duration')
-        birds = data.get('birds')
+        # Display the current upgrade information
+        print(Fore.WHITE + f"Current Level: {upgrade_info.get('level')}")
+        print(Fore.WHITE + f"Current Birds: {upgrade_info.get('birds')}")
+        print(Fore.WHITE + f"Next Level: {upgrade_info['nextLevel']['level']}")
+        print(Fore.WHITE + f"Upgrade Status: {upgrade_info.get('status')}")
         
-        # Extract next level information
-        next_level_data = data.get('nextLevel', {})
-        next_level = next_level_data.get('level')
-        next_birds = next_level_data.get('birds')
-        next_worms = next_level_data.get('worms')
-        next_duration = next_level_data.get('duration')
-        
-        # Display upgrade information
-        print(Fore.GREEN + f"Current Level: {current_level}")
-        print(Fore.GREEN + f"Upgrade Status: {status}")
-        print(Fore.GREEN + f"Birds: {birds}")
-        print(Fore.GREEN + f"Upgrade Duration: {duration} hours")
-
-        # Display next level information if available
-        if next_level:
-            print(Fore.YELLOW + "\nNext Level Info:")
-            print(Fore.YELLOW + f"Next Level: {next_level}")
-            print(Fore.YELLOW + f"Birds required for next level: {next_birds}")
-            print(Fore.YELLOW + f"Worms required for next level: {next_worms}")
-            print(Fore.YELLOW + f"Upgrade Duration for next level: {next_duration} hours")
-        
+        # Only proceed with the upgrade if the status is not 'processing'
+        if upgrade_info.get('status') != 'processing':
+            # Step 2: Upgrade to the next level using /incubate/upgrade
+            upgrade_url = "https://birdx-api2.birds.dog/minigame/incubate/upgrade"
+            
+            # Prepare the data for the upgrade request
+            upgrade_data = {
+                "level": upgrade_info['nextLevel']['level'],
+                "upgradedAt": int(time.time() * 1000),  # Convert to milliseconds
+                "status": "processing",
+                "duration": upgrade_info['nextLevel']['duration'],
+                "birds": upgrade_info['nextLevel']['birds'],
+                "nextLevel": upgrade_info['nextLevel']
+            }
+            
+            upgrade_response = requests.post(upgrade_url, headers=headers, json=upgrade_data)
+            
+            if upgrade_response.status_code == 200:
+                print(Fore.GREEN + "Upgrade successful!")
+            else:
+                print(Fore.RED + f"Failed to upgrade. Status Code: {upgrade_response.status_code}")
+                print(Fore.RED + f"Error: {upgrade_response.text}")
+        else:
+            print(Fore.YELLOW + "Upgrade already in process. Please wait.")
     else:
-        print(Fore.RED + f"Failed to upgrade incubator. Status Code: {response.status_code}")
-        print(Fore.RED + f"Response Content: {response.text}")
+        print(Fore.RED + f"Failed to fetch upgrade info. Status Code: {info_response.status_code}")
+        print(Fore.RED + f"Error: {info_response.text}")
 
 
 def main():
