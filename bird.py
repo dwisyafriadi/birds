@@ -169,55 +169,60 @@ def user():
     print(Fore.GREEN + f"\nTotal Rewards: " + Fore.WHITE + f"{total_rewards_sum}" + Style.RESET_ALL)
 
 def play_game(headers):
-    # Step 1: Join the game
-    join_url = "https://birdx-api2.birds.dog/minigame/egg/join"
-    join_response = requests.get(join_url, headers=headers)
+    play_url = "https://birdx-api2.birds.dog/minigame/egg/play"
     
-    if join_response.status_code == 200:
-        join_data = join_response.json()
-        turns_left = join_data.get('turn')
+    high_score = 0        # Initialize the high score variable
+    total_points = 0      # (Optional) Keep track of total points earned
+
+    # First, make a POST request to play the game and get the initial turn value
+    response = requests.get(play_url, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        turns_left = data.get('turn', 0)
+        result_points = data.get('result', 0)
         
-        print(Fore.GREEN + f"Joined the game. Turns Left: {turns_left}")
+        # Update high score if current result is greater
+        if result_points > high_score:
+            high_score = result_points
         
-        # Step 2: Play the game while turns > 0
+        total_points += result_points  # Update total points
+
+        # Display the first play result
+        print(Fore.GREEN + f"Played the game. Points Earned: {result_points}")
+        print(Fore.GREEN + f"Turns Left: {turns_left}")
+        
+        # Now, loop as many times as the 'turn' value indicates
         while turns_left > 0:
-            # Play the game
-            play_url = "https://birdx-api2.birds.dog/minigame/egg/play"
-            play_response = requests.post(play_url, headers=headers)
-            
-            if play_response.status_code == 200:
-                play_data = play_response.json()
-                result_points = play_data.get('result')
-                turns_left = play_data.get('turn')
+            response = requests.get(play_url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                result_points = data.get('result', 0)
+                turns_left = data.get('turn', 0)
+                
+                # Update high score if current result is greater
+                if result_points > high_score:
+                    high_score = result_points
+
+                total_points += result_points  # Update total points
 
                 print(Fore.GREEN + f"Played the game. Points Earned: {result_points}")
                 print(Fore.GREEN + f"Turns Left: {turns_left}")
-
-                # Step 3: Check remaining turns via /minigame/egg/turn API
-                turn_url = "https://birdx-api2.birds.dog/minigame/egg/turn"
-                turn_response = requests.get(turn_url, headers=headers)
                 
-                if turn_response.status_code == 200:
-                    turn_data = turn_response.json()
-                    turns_left = turn_data.get('turn')
-                    print(Fore.YELLOW + f"Updated Turns Left: {turns_left}")
-                else:
-                    print(Fore.RED + f"Failed to check remaining turns. Status Code: {turn_response.status_code}")
-                    break  # Exit the loop if turn check fails
-                
+                # If no more turns are left, break the loop
+                if turns_left <= 0:
+                    print(Fore.YELLOW + "No more turns left.")
+                    break
             else:
-                print(Fore.RED + f"Failed to play the game. Status Code: {play_response.status_code}")
-                print(Fore.RED + f"Response Content: {play_response.text}")
-                break  # Exit the loop if the play action fails
-        
-        # Step 4: Handle no turns left
-        if turns_left <= 0:
-            print(Fore.RED + "No more turns left. Waiting for 1 hour before retrying...")
-            time.sleep(3600)  # Sleep for 1 hour before retrying
-    
+                print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
+                print(Fore.RED + f"Response Content: {response.text}")
+                break
+
+        # After the game loop, display the high score and total points
+        print(Fore.CYAN + f"High Score: {high_score}")
+        print(Fore.CYAN + f"Total Points Earned: {total_points}")
     else:
-        print(Fore.RED + f"Failed to join the game. Status Code: {join_response.status_code}")
-        print(Fore.RED + f"Response Content: {join_response.text}")
+        print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
+        print(Fore.RED + f"Response Content: {response.text}")
 
 def confirm_upgrade(headers):
     url = "https://birdx-api2.birds.dog/minigame/incubate/confirm-upgraded"
@@ -283,7 +288,7 @@ def main():
         print(Fore.WHITE + f"\nRun auto complete task information...")
         complete_all_tasks()
         print(Fore.WHITE + f"\nRun auto Playing Game...")
-        #play_game(headers)
+        play_game(headers)
 
 if __name__ == "__main__":
     main()
