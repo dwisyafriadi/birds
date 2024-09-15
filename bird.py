@@ -32,32 +32,23 @@ def fetch_tasks(headers):
     # Print full response content for debugging
     print(Fore.YELLOW + "API Response:", response.json())  # Print entire response JSON
     if response.status_code == 200:
-        projects = response.json()
-        if isinstance(projects, list):
-            all_tasks = []
-            for project in projects:
-                tasks = project.get('tasks', [])
-                if isinstance(tasks, list):
-                    all_tasks.extend(tasks)  # Add tasks from this project to the all_tasks list
-            return all_tasks  # Return the combined list of tasks
+        data = response.json()
+        if isinstance(data, dict) and 'tasks' in data:
+            return data['tasks']  # Return the tasks list directly
         else:
-            print(Fore.RED + "Unexpected format: Response is not a list.")
-            return []
+            print(Fore.RED + "Unexpected format: 'tasks' key not found in the response.")
+            return []  # Return an empty list if the format is incorrect
     else:
         response.raise_for_status()
 
-def clear_task(task_id, channel_id, slug, point, headers):
-    # Update the URL to the correct endpoint
+def clear_task(task_id, headers):
     url = "https://birdx-api.birds.dog/project/join-task"
-    
-    # Prepare the payload according to the provided sample
     payload = {
         "taskId": task_id,
-        "channelId": channel_id,
-        "slug": slug,
-        "point": point
+        "channelId": "",
+        "slug": "none",
+        "point": 0  # Adjust as needed
     }
-    
     response = requests.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
@@ -77,8 +68,24 @@ def clear_task(task_id, channel_id, slug, point, headers):
             print(Fore.RED + f"Response content: {response.text}")
         response.raise_for_status()
 
-
-
+def check_task_completion(task_id, headers):
+    url = "https://birdx-api.birds.dog/user-join-task/"
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        # Check if task_id is present in the response data
+        for task in data:
+            if task.get('taskId') == task_id:
+                print(Fore.YELLOW + f"Task {task_id} already completed.")
+                return True
+        # If task_id is not found
+        print(Fore.RED + f"Task {task_id} not found. Please perform the task manually.")
+        return False
+    else:
+        print(Fore.RED + f"Failed to fetch task completion status.")
+        print(Fore.RED + f"Status Code: {response.status_code}")
+        response.raise_for_status()
 
 def print_welcome_message():
     print(Fore.GREEN + Style.BRIGHT + "CATS BOT")
@@ -93,25 +100,20 @@ def complete_all_tasks():
     
     for token in tokens:
         headers = get_headers(token)
-        tasks_data = fetch_tasks(headers)
+        tasks = fetch_tasks(headers)  # Fetch the tasks directly
         
-        if isinstance(tasks_data, list):
-            for task in tasks_data:
+        if isinstance(tasks, list):  # Ensure tasks is a list
+            for task in tasks:
                 if task.get('is_enable'):
-                    try:
-                        clear_task(
-                            task['_id'],                # taskId
-                            task.get('channelId', ''),  # channelId
-                            task.get('slug', 'none'),   # slug
-                            task.get('point', 0),       # point
-                            headers
-                        )
-                    except requests.RequestException:
-                        # Handle any request exception and move on to the next task
-                        print(Fore.WHITE + f"Skipping task {task['_id']} due to an error.")
+                    task_id = task['_id']
+                    if not check_task_completion(task_id, headers):  # Check if the task is already completed
+                        try:
+                            clear_task(task_id, headers)  # Use '_id' as task identifier
+                        except requests.RequestException:
+                            # Handle any request exception and move on to the next task
+                            print(Fore.WHITE + f"Skipping task {task_id} due to an error.")
         else:
             print(Fore.RED + "No valid tasks found or tasks data format is incorrect.")
-
 
 def user():
     tokens = get_authorization_tokens()
