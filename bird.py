@@ -168,61 +168,90 @@ def user():
     print(Fore.GREEN + f"\nTotal Rewards: " + Fore.WHITE + f"{total_rewards_sum}" + Style.RESET_ALL)
 
 def play_game(headers):
-    url = "https://birdx-api2.birds.dog/minigame/egg/join"
+    url = "https://birdx-api2.birds.dog/minigame/egg/play"
     
+    # Send the POST request to play the game
     response = requests.post(url, headers=headers)
     
     if response.status_code == 200:
         data = response.json()
         
-        # Extracting response details
-        game_id = data.get('_id')
-        telegram_id = data.get('telegramId')
+        # Extract turn and result from the response
         turns_left = data.get('turn')
-        last_play_at = data.get('lastPlayAt')
-        results = data.get('results', [])
-        total_points = data.get('total')
+        result_points = data.get('result')
 
-        # Check if there are any results
-        if results:
-            last_result = results[-1]  # Get the latest result
-            played_at = last_result.get('playedAt')
-            points = last_result.get('point')
-            result_id = last_result.get('_id')
+        # Display the current game status
+        print(Fore.GREEN + f"Turns Left: {turns_left}")
+        print(Fore.GREEN + f"Points Earned: {result_points}")
 
-            # Displaying game information
-            print(Fore.GREEN + f"Game ID: {game_id}")
-            print(Fore.GREEN + f"Telegram ID: {telegram_id}")
-            print(Fore.GREEN + f"Turns Left: {turns_left}")
-            print(Fore.GREEN + f"Last Played At: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(last_play_at / 1000))}")
-            print(Fore.GREEN + f"Last Play Time (Server): {played_at}")
-            print(Fore.GREEN + f"Points Gained: {points}")
-            print(Fore.GREEN + f"Result ID: {result_id}")
-            print(Fore.GREEN + f"Total Points: {total_points}")
-
-            # Handling turns
-            if turns_left > 1:
-                print(Fore.YELLOW + f"Playing the game. {turns_left} turns left.")
-                # Implement your logic to play the game if needed
-            elif turns_left < 1:
-                print(Fore.RED + "No more turns left. Waiting for 1 hour before retrying...")
-                time.sleep(3600)  # Sleep for 1 hour
-            else:
-                print(Fore.RED + "Unexpected situation.")
+        # Handle turns logic
+        if turns_left > 1:
+            print(Fore.YELLOW + f"Playing the game. {turns_left} turns left.")
+            # You can add a loop here to keep playing as long as turns_left > 1
+            play_game(headers)  # Recursive call to continue playing
+        elif turns_left < 1:
+            print(Fore.RED + "No more turns left. Waiting for 1 hour before retrying...")
+            time.sleep(3600)  # Sleep for 1 hour before retrying
         else:
-            print(Fore.YELLOW + "No game results found yet.")
-
+            print(Fore.RED + "Unexpected situation.")
+    
     else:
         print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
         print(Fore.RED + f"Response Content: {response.text}")
 
+def upgrade(headers):
+    url = "https://birdx-api2.birds.dog/minigame/incubate/upgrade"
+    
+
+    confirmation = input(Fore.WHITE + f"Apakah Anda ingin auto upgrade? (y/n): ").strip().lower()
+    if confirmation != 'y':
+        return
+    
+    
+    # Send the POST request to upgrade the incubator
+    response = requests.post(url, headers=headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Extract current upgrade information
+        current_level = data.get('level')
+        upgraded_at = data.get('upgradedAt')
+        status = data.get('status')
+        duration = data.get('duration')
+        birds = data.get('birds')
+        
+        # Extract next level information
+        next_level_data = data.get('nextLevel', {})
+        next_level = next_level_data.get('level')
+        next_birds = next_level_data.get('birds')
+        next_worms = next_level_data.get('worms')
+        next_duration = next_level_data.get('duration')
+        
+        # Display upgrade information
+        print(Fore.GREEN + f"Current Level: {current_level}")
+        print(Fore.GREEN + f"Upgrade Status: {status}")
+        print(Fore.GREEN + f"Birds: {birds}")
+        print(Fore.GREEN + f"Upgrade Duration: {duration} hours")
+
+        # Display next level information if available
+        if next_level:
+            print(Fore.YELLOW + "\nNext Level Info:")
+            print(Fore.YELLOW + f"Next Level: {next_level}")
+            print(Fore.YELLOW + f"Birds required for next level: {next_birds}")
+            print(Fore.YELLOW + f"Worms required for next level: {next_worms}")
+            print(Fore.YELLOW + f"Upgrade Duration for next level: {next_duration} hours")
+        
+    else:
+        print(Fore.RED + f"Failed to upgrade incubator. Status Code: {response.status_code}")
+        print(Fore.RED + f"Response Content: {response.text}")
 
 
 def main():
     print_welcome_message()
     print(Fore.WHITE + f"\nDisplaying user information...")
     user()
-    
+    print(Fore.WHITE + f"\n............................")
     tokens = get_authorization_tokens()
     for token in tokens:
         headers = get_headers(token)
@@ -232,9 +261,10 @@ def main():
             print(Fore.WHITE + "Task data received.")
         else:
             print(Fore.RED + "No tasks available.")
-
+    print(Fore.WHITE + f"\nAuto Upgrade information...")
+    upgrade()
     print(Fore.WHITE + f"\nRun auto complete task information...")
-    complete_all_tasks()
+    #complete_all_tasks()
     print(Fore.WHITE + f"\nRun auto Playing Game...")
     play_game(headers)
 
