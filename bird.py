@@ -264,7 +264,7 @@ def main():
     print(Fore.WHITE + f"\nAuto Upgrade information...")
     upgrade()
     print(Fore.WHITE + f"\nRun auto complete task information...")
-    #complete_all_tasks()
+    complete_all_tasks()
     print(Fore.WHITE + f"\nRun auto Playing Game...")
     play_game(headers)
 
