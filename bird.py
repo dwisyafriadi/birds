@@ -70,11 +70,6 @@ def clear_task(task_id, channel_id, slug, point, headers):
         # Display error if task completion fails
         print(Fore.RED + f"Failed to mark task {task_id} as completed.")
         print(Fore.RED + f"Please Running task Manually")
-        try:
-            error_data = response.json()
-            print(Fore.RED + f"Error details: {error_data}")
-        except ValueError:
-            print(Fore.RED + f"Response content: {response.text}")
         response.raise_for_status()
 
 
