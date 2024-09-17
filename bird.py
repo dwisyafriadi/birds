@@ -47,16 +47,13 @@ def fetch_tasks(headers):
     else:
         response.raise_for_status()
 
-def clear_task(task_id, channel_id, slug, point, headers):
+def clear_task(task_id, headers):
     # Update the URL to the correct endpoint
     url = "https://birdx-api.birds.dog/project/join-task"
     
     # Prepare the payload according to the provided sample
     payload = {
         "taskId": task_id,
-        "channelId": channel_id,
-        "slug": slug,
-        "point": point
     }
     
     response = requests.post(url, headers=headers, json=payload)
@@ -98,36 +95,37 @@ def check_task_completion(task_id, headers):
         print(Fore.RED + f"Status Code: {response.status_code}")
         response.raise_for_status()
 
+user_confirmation_saved = None  # Will store True or False
 
-def complete_all_tasks():
+def complete_all_tasks(skip_confirmation=False):
+    global user_confirmation_saved  # Use the global variable to track user choice
     tokens = get_authorization_tokens()
     
-    confirmation = input(Fore.WHITE + f"Apakah Anda ingin menyelesaikan semua task? (y/n): ").strip().lower()
-    if confirmation != 'y':
-        return
-    
-    for token in tokens:
-        headers = get_headers(token)
-        tasks = fetch_tasks(headers)  # Fetch the tasks directly
-        
-        if isinstance(tasks, list):  # Ensure tasks is a list
-            for task in tasks:
-                if task.get('is_enable'):
-                    task_id = task['_id']
-                    if not check_task_completion(task_id, headers):  # Check if the task is already completed
-                        try:
-                            clear_task(
-                            task['_id'],                # taskId
-                            task.get('channelId', ''),  # channelId
-                            task.get('slug', 'none'),   # slug
-                            task.get('point', 0),       # point
-                            headers
-                            )
-                        except requests.RequestException:
-                            # Handle any request exception and move on to the next task
-                            print(Fore.WHITE + f"Skipping task {task_id} due to an error.")
+    if user_confirmation_saved is None:  # Ask for confirmation only if not already saved
+        confirmation = input(Fore.WHITE + f"Do you want to complete all tasks? (y/n): ").strip().lower()
+        if confirmation == 'y':
+            user_confirmation_saved = True  # Save the user's choice
         else:
-            print(Fore.RED + "No valid tasks found or tasks data format is incorrect.")
+            user_confirmation_saved = False  # User chose not to complete tasks
+
+    if user_confirmation_saved:  # Only complete tasks if the user confirmed with 'y'
+        for token in tokens:
+            headers = get_headers(token)
+            tasks = fetch_tasks(headers)  # Fetch the tasks directly
+
+            if isinstance(tasks, list):  # Ensure tasks is a list
+                for task in tasks:
+                    if task.get('is_enable'):
+                        task_id = task['_id']
+                        if not check_task_completion(task_id, headers):  # Check if the task is already completed
+                            try:
+                                clear_task(task_id, headers)  # Use '_id' as task identifier
+                            except requests.RequestException:
+                                print(Fore.WHITE + f"Skipping task {task_id} due to an error.")
+            else:
+                print(Fore.RED + "No valid tasks found or tasks data format is incorrect.")
+    else:
+        print(Fore.YELLOW + "Task completion skipped based on user selection.")
 
 
 
@@ -170,59 +168,60 @@ def user():
 
 def play_game(headers):
     play_url = "https://birdx-api2.birds.dog/minigame/egg/play"
+    turn_url = "https://birdx-api2.birds.dog/minigame/egg/turn"
     
     high_score = 0        # Initialize the high score variable
-    total_points = 0      # (Optional) Keep track of total points earned
-
-    # First, make a POST request to play the game and get the initial turn value
-    response = requests.get(play_url, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        turns_left = data.get('turn', 0)
-        result_points = data.get('result', 0)
-        
-        # Update high score if current result is greater
-        if result_points > high_score:
-            high_score = result_points
-        
-        total_points += result_points  # Update total points
-
-        # Display the first play result
-        print(Fore.GREEN + f"Played the game. Points Earned: {result_points}")
-        print(Fore.GREEN + f"Turns Left: {turns_left}")
-        
-        # Now, loop as many times as the 'turn' value indicates
-        while turns_left > 0:
-            response = requests.get(play_url, headers=headers)
-            if response.status_code == 200:
-                data = response.json()
-                result_points = data.get('result', 0)
-                turns_left = data.get('turn', 0)
+    total_points = 0      # Keep track of total points earned
+    
+    while True:
+        try:
+            # Check the number of turns available
+            turn_response = requests.get(turn_url, headers=headers)
+            if turn_response.status_code == 200:
+                turn_data = turn_response.json()
+                turns_left = turn_data.get('turn', 0)
                 
-                # Update high score if current result is greater
-                if result_points > high_score:
-                    high_score = result_points
-
-                total_points += result_points  # Update total points
-
-                print(Fore.GREEN + f"Played the game. Points Earned: {result_points}")
-                print(Fore.GREEN + f"Turns Left: {turns_left}")
-                
-                # If no more turns are left, break the loop
-                if turns_left <= 0:
-                    print(Fore.YELLOW + "No more turns left.")
-                    break
+                if turns_left > 0:
+                    print(Fore.GREEN + f"Turns Available: {turns_left}")
+                    
+                    # Loop through the available turns
+                    while turns_left > 0:
+                        # Play the game
+                        response = requests.get(play_url, headers=headers)
+                        if response.status_code == 200:
+                            data = response.json()
+                            result_points = data.get('result', 0)
+                            turns_left = data.get('turn', 0)
+                            
+                            # Update high score and total points
+                            if result_points > high_score:
+                                high_score = result_points
+                            total_points += result_points
+                            
+                            print(Fore.GREEN + f"Played the game. Points Earned: {result_points}")
+                            print(Fore.GREEN + f"Turns Left after play: {turns_left}")
+                            
+                            # If no more turns are left, break the inner loop to check again
+                            if turns_left <= 0:
+                                print(Fore.YELLOW + "No more turns left.")
+                                break
+                        else:
+                            print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
+                            print(Fore.RED + f"Response Content: {response.text}")
+                            break  # Exit the inner loop if play fails
+                else:
+                    print(Fore.YELLOW + "No turns available. Sleeping for 30 minutes...")
+                    time.sleep(1800)  # Sleep for 30 minutes
+                    print(Fore.CYAN + "Waking up and checking turns again...")
             else:
-                print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
-                print(Fore.RED + f"Response Content: {response.text}")
-                break
-
-        # After the game loop, display the high score and total points
-        print(Fore.CYAN + f"High Score: {high_score}")
-        print(Fore.CYAN + f"Total Points Earned: {total_points}")
-    else:
-        print(Fore.RED + f"Failed to play the game. Status Code: {response.status_code}")
-        print(Fore.RED + f"Response Content: {response.text}")
+                print(Fore.RED + f"Failed to get turn information. Status Code: {turn_response.status_code}")
+                print(Fore.RED + f"Response Content: {turn_response.text}")
+                break  # Exit the loop if unable to get turn info
+        except KeyboardInterrupt:
+            print(Fore.RED + "\nBot stopped by user.")
+            print(Fore.CYAN + f"Final High Score: {high_score}")
+            print(Fore.CYAN + f"Total Points Earned: {total_points}")
+            sys.exit()
 
 def confirm_upgrade(headers):
     url = "https://birdx-api2.birds.dog/minigame/incubate/confirm-upgraded"
@@ -270,25 +269,32 @@ def upgrade(headers):
 
 def main():
     print_welcome_message()
-    print(Fore.WHITE + f"\nDisplaying user information...")
-    user()
-    print(Fore.WHITE + f"\n............................")
-    tokens = get_authorization_tokens()
-    for token in tokens:
-        headers = get_headers(token)
-        print(Fore.WHITE + f"\nDisplaying Task information for token {token[:10]}...")
-        tasks = fetch_tasks(headers)
-        if tasks:
-            print(Fore.WHITE + "Task data received.")
-        else:
-            print(Fore.RED + "No tasks available.")
-        print(Fore.WHITE + f"\nAuto Upgrade information for token query_id={token[:10]}...")
-        system_check(headers)
-        upgrade(headers)  # Pass 'headers' to upgrade()
-        print(Fore.WHITE + f"\nRun auto complete task information...")
-        complete_all_tasks()
-        print(Fore.WHITE + f"\nRun auto Playing Game...")
-        play_game(headers)
+    while True:
+        try:
+            print(Fore.WHITE + f"\nDisplaying user information...")
+            user()
+            print(Fore.WHITE + f"\n............................")
+            tokens = get_authorization_tokens()
+            for token in tokens:
+                headers = get_headers(token)
+                print(Fore.WHITE + f"\nDisplaying Task information for token {token[:10]}...")
+                tasks = fetch_tasks(headers)
+                if tasks:
+                    print(Fore.WHITE + "Task data received.")
+                else:
+                    print(Fore.RED + "No tasks available.")
+                print(Fore.WHITE + f"\nAuto Upgrade information for token query_id={token[:10]}...")
+                upgrade(headers)
+                print(Fore.WHITE + f"\nRun auto complete task information for token {token[:10]}...")
+                complete_all_tasks(skip_confirmation=True)
+                print(Fore.WHITE + f"\nRun auto Playing Game for token {token[:10]}...")
+                play_game(headers)
+            # No need to sleep here, as play_game handles sleeping when no turns are available
+        except KeyboardInterrupt:
+            print(Fore.RED + "\nBot stopped by user.")
+            sys.exit()
+
+
 
 if __name__ == "__main__":
     main()
