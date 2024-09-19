@@ -272,6 +272,15 @@ def confirm_upgrade(headers, username):
     except requests.RequestException as e:
         print(Fore.RED + f"Failed to confirm upgrade. Error: {e}")
 
+def countdown_timer(seconds):
+    while seconds:
+        mins, secs = divmod(seconds, 60)
+        timer_format = f"{mins:02d}:{secs:02d}"
+        print(Fore.YELLOW + f"Waiting {timer_format} before the next task...", end="\r")
+        time.sleep(1)
+        seconds -= 1
+    print(Fore.YELLOW + "\nProceeding to the next task..." + " " * 20)
+
 def main():
     print_welcome_message()
     while True:
@@ -305,10 +314,14 @@ def main():
                 except Exception as e:
                     print(Fore.RED + f"An error occurred while processing user {username}: {e}")
                     print(Fore.YELLOW + "Skipping to the next user...\n")
-            
+                
+                # Add cooldown timer before moving to the next token
+                print(Fore.CYAN + f"\nCooldown before moving to the next user...")
+                countdown_timer(10)  # Adjust the cooldown period as needed (e.g., 30 seconds)
+
             # After processing all tokens, sleep for a short duration before restarting
             print(Fore.CYAN + "\nAll tokens processed. Restarting the bot in 5 seconds...\n")
-            time.sleep(1800)  # Sleep for 5 seconds before restarting
+            countdown_timer(1800)  # Short delay before restarting (you can adjust as needed)
 
         except KeyboardInterrupt:
             print(Fore.RED + "\nBot stopped by user.")
