@@ -58,7 +58,7 @@ def clear_task(task_id, headers):
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.get(url, headers=headers, json=payload)
         response.raise_for_status()
         response_data = response.json()
         if response_data.get('msg') == "Successfully":
@@ -246,7 +246,7 @@ def upgrade(headers, username):
             }
             print(Fore.GREEN + f"Upgrading to Level {next_level}...")
             try:
-                upgrade_response = requests.post(upgrade_url, headers=headers, json=upgrade_payload)
+                upgrade_response = requests.get(upgrade_url, headers=headers, json=upgrade_payload)
                 upgrade_response.raise_for_status()
                 print(Fore.GREEN + "Upgrade initiated successfully.")
                 # Confirm the upgrade
@@ -308,7 +308,7 @@ def main():
             
             # After processing all tokens, sleep for a short duration before restarting
             print(Fore.CYAN + "\nAll tokens processed. Restarting the bot in 5 seconds...\n")
-            time.sleep(5)  # Sleep for 5 seconds before restarting
+            time.sleep(1800)  # Sleep for 5 seconds before restarting
 
         except KeyboardInterrupt:
             print(Fore.RED + "\nBot stopped by user.")
